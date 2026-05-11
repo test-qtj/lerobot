@@ -1,0 +1,6 @@
+robot:
+  type: openarm_follower
+  port: can0
+  side: right
+  id: my_openarm_follower
+  use_can_fd: false

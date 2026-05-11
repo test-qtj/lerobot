@@ -78,6 +78,7 @@ from lerobot.robots import (  # noqa: F401
     make_robot_from_config,
     omx_follower,
     openarm_follower,
+    hyopenarm_follower,
     reachy2,
     so_follower,
     unitree_g1 as unitree_g1_robot,
@@ -95,9 +96,11 @@ from lerobot.teleoperators import (  # noqa: F401
     omx_leader,
     openarm_leader,
     openarm_mini,
+    hyopenarm_leader,
     reachy2_teleoperator,
     so_leader,
     unitree_g1,
+    bi_hyopenarm_leader,
 )
 from lerobot.utils.import_utils import register_third_party_plugins
 from lerobot.utils.robot_utils import precise_sleep
@@ -111,7 +114,7 @@ class TeleoperateConfig:
     teleop: TeleoperatorConfig
     robot: RobotConfig
     # Limit the maximum frames per second.
-    fps: int = 60
+    fps: int = 60  ##
     teleop_time_s: float | None = None
     # Display all cameras on screen
     display_data: bool = False
@@ -165,14 +168,47 @@ def teleop_loop(
 
         # Get teleop action
         raw_action = teleop.get_action()
+        # print("\n================ obs ================")
+        # print(type(obs))
+        # print(obs)
 
+        # print("\n================ raw_action ================")
+        # print(type(raw_action))
+        # print(raw_action)
         # Process teleop action through pipeline
         teleop_action = teleop_action_processor((raw_action, obs))
-
+        # print("\n================ teleop_action ================")
+        # print(type(teleop_action))
+        # print(teleop_action)
         # Process action for robot through pipeline
         robot_action_to_send = robot_action_processor((teleop_action, obs))
-
+        # Invert left/right joint_1 ~ joint_4
+        for side in ("left", "right"):
+            for joint_idx in range(1, 5):
+                for field in ("pos", "vel", "torque"):
+                    key = f"{side}_joint_{joint_idx}.{field}"
+                    if key in robot_action_to_send:
+                        robot_action_to_send[key] = -robot_action_to_send[key]
+        # print("\n================ robot_action_to_send ================")
+        # print(type(robot_action_to_send))
+        # print(robot_action_to_send)
         # Send processed action to robot (robot_action_processor.to_output should return RobotAction)
+        #-------------------debug--------------------------------
+        # if not hasattr(robot_action_processor, "_dumped_robot_action_once"):
+        #     from pprint import pformat
+
+        #     dump_path = f"/tmp/robot_action_to_send_{int(time.time())}.txt"
+
+        #     with open(dump_path, "w", encoding="utf-8") as f:
+        #         f.write("================ robot_action_to_send ================\n")
+        #         f.write(f"type: {type(robot_action_to_send)}\n\n")
+        #         f.write(pformat(robot_action_to_send, width=160, sort_dicts=False))
+        #         f.write("\n======================================================\n")
+
+        #     print(f"\n[DEBUG] Full robot_action_to_send dumped to: {dump_path}\n")
+        #     robot_action_processor._dumped_robot_action_once = True
+
+        print(robot_action_to_send)
         _ = robot.send_action(robot_action_to_send)
 
         if display_data:

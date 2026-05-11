@@ -1,0 +1,18 @@
+teleop:
+  type: openarm_leader
+  port: can1
+  id: my_openarm_leader
+  use_can_fd: false
+
+  position_kp: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
+  position_kd: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
+robot:
+  type: openarm_follower
+  port: can0
+  side: right
+  id: my_openarm_follower
+  use_can_fd: false
+
+  position_kp: [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
+  position_kd: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]

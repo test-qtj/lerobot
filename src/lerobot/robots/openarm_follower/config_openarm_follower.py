@@ -54,7 +54,6 @@ class OpenArmFollowerConfigBase:
 
     # side of the arm: "left" or "right". If "None" default values will be used
     side: str | None = None
-
     # CAN interface type: "socketcan" (Linux), "slcan" (serial), or "auto" (auto-detect)
     can_interface: str = "socketcan"
 
@@ -84,21 +83,23 @@ class OpenArmFollowerConfigBase:
         default_factory=lambda: {
             "joint_1": (0x01, 0x11, "dm8009"),  # J1 - Shoulder pan (DM8009)
             "joint_2": (0x02, 0x12, "dm8009"),  # J2 - Shoulder lift (DM8009)
-            "joint_3": (0x03, 0x13, "dm4340"),  # J3 - Shoulder rotation (DM4340)
-            "joint_4": (0x04, 0x14, "dm4340"),  # J4 - Elbow flex (DM4340)
-            "joint_5": (0x05, 0x15, "dm4310"),  # J5 - Wrist roll (DM4310)
-            "joint_6": (0x06, 0x16, "dm4310"),  # J6 - Wrist pitch (DM4310)
-            "joint_7": (0x07, 0x17, "dm4310"),  # J7 - Wrist rotation (DM4310)
-            "gripper": (0x08, 0x18, "dm4310"),  # J8 - Gripper (DM4310)
+            "joint_3": (0x03, 0x13, "dm4340_48V"),  # J3 - Shoulder rotation (DM4340)
+            "joint_4": (0x04, 0x14, "dm4340_48V"),  # J4 - Elbow flex (DM4340)
+            "joint_5": (0x05, 0x15, "dm4310_48V"),  # J5 - Wrist roll (DM4310)
+            "joint_6": (0x06, 0x16, "dm4310_48V"),  # J6 - Wrist pitch (DM4310)
+            "joint_7": (0x07, 0x17, "dm4310_48V"),  # J7 - Wrist rotation (DM4310)
+            "gripper": (0x08, 0x18, "dm4310_48V"),  # J8 - Gripper (DM4310)
         }
     )
 
     # MIT control parameters for position control (used in send_action)
     # List of 8 values: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6, joint_7, gripper]
     position_kp: list[float] = field(
-        default_factory=lambda: [240.0, 240.0, 240.0, 240.0, 24.0, 31.0, 25.0, 25.0]
+        #default_factory=lambda: [240.0, 240.0, 240.0, 240.0, 24.0, 31.0, 25.0, 25.0]
+        default_factory=lambda: [50.0, 50.0, 50.0, 50.0, 25.0, 8.0, 8.0, 8.0]
     )
-    position_kd: list[float] = field(default_factory=lambda: [5.0, 5.0, 3.0, 5.0, 0.3, 0.3, 0.3, 0.3])
+    #position_kd: list[float] = field(default_factory=lambda: [5.0, 5.0, 3.0, 5.0, 0.3, 0.3, 0.3, 0.3])
+    position_kd: list[float] = field(default_factory=lambda: [1.0, 1.0, 1.0, 1.0, 0.5, 0.2, 0.2, 0.2])
 
     # Values for joint limits. Can be overridden via CLI (for custom values) or by setting config.side to either 'left' or 'right'.
     # If config.side is left set to None and no CLI values are passed, the default joint limit values are small for safety.

@@ -106,8 +106,8 @@ class OpenArmLeader(Teleoperator):
 
         self.configure()
 
-        if self.is_calibrated:
-            self.bus.set_zero_position()
+        # if self.is_calibrated:
+        #     self.bus.set_zero_position()
 
         logger.info(f"{self} connected.")
 

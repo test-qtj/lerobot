@@ -193,7 +193,7 @@ class DamiaoMotorsBus(MotorsBusBase):
             self._is_connected = True
 
             if handshake:
-                self._handshake()
+                self._handshake()#在连接总线后，对电机进行握手（handshake）检查
 
             logger.debug(f"{self.__class__.__name__} connected via {self.can_interface}.")
         except Exception as e:
@@ -350,7 +350,7 @@ class DamiaoMotorsBus(MotorsBusBase):
 
         self.canbus.send(msg)
         return self._recv_motor_response(expected_recv_id=recv_id)
-
+    #读取电机状态的函数，发送刷新命令并等待响应
     def _recv_motor_response(
         self, expected_recv_id: int | None = None, timeout: float = 0.001
     ) -> can.Message | None:

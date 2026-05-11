@@ -1,0 +1,5 @@
+teleop:
+  type: hyopenarm_leader
+  port: can1
+  id: my_hyopenarm_leader
+  use_can_fd: false

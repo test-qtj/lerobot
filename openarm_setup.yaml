@@ -1,0 +1,5 @@
+use_fd: TRUE   ### Use CAN FD (True) or CAN 2.0 (False)
+mode: setup
+
+
+lerobot-setup-can --mode=test --interfaces=can0

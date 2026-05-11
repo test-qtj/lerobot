@@ -55,6 +55,7 @@ class OpenArmFollower(Robot):
             motor = Motor(
                 send_id, motor_type_str, MotorNormMode.DEGREES
             )  # Always use degrees for Damiao motors
+            
             motor.recv_id = recv_id
             motor.motor_type_str = motor_type_str
             motors[motor_name] = motor
@@ -68,7 +69,8 @@ class OpenArmFollower(Robot):
             bitrate=self.config.can_bitrate,
             data_bitrate=self.config.can_data_bitrate if self.config.use_can_fd else None,
         )
-
+        #这个就是DamiaoMotorsBus类的实例，负责与Damiao电机进行通信，初始化时传入CAN接口配置和电机信息
+        #里面封装了CAN消息的函数
         if config.side is not None:
             if config.side == "left":
                 config.joint_limits = LEFT_DEFAULT_JOINTS_LIMITS
@@ -144,8 +146,8 @@ class OpenArmFollower(Robot):
 
         self.configure()
 
-        if self.is_calibrated:
-            self.bus.set_zero_position()
+        # if self.is_calibrated:
+        #     self.bus.set_zero_position()
 
         self.bus.enable_torque()
 
@@ -216,6 +218,7 @@ class OpenArmFollower(Robot):
     def setup_motors(self) -> None:
         raise NotImplementedError(
             "Motor ID configuration is typically done via manufacturer tools for CAN motors."
+            #对 CAN 电机来说，ID 配置通常需要使用厂商提供的工具（比如 Damiao Debugging Tools）来完成，而不是通过程序自动设置。
         )
 
     @check_if_not_connected

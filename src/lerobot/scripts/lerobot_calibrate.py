@@ -44,6 +44,7 @@ from lerobot.robots import (  # noqa: F401
     make_robot_from_config,
     omx_follower,
     openarm_follower,
+    hyopenarm_follower,
     so_follower,
 )
 from lerobot.teleoperators import (  # noqa: F401
@@ -56,9 +57,11 @@ from lerobot.teleoperators import (  # noqa: F401
     make_teleoperator_from_config,
     omx_leader,
     openarm_leader,
+    hyopenarm_leader,
     openarm_mini,
     so_leader,
     unitree_g1,
+    bi_hyopenarm_leader,
 )
 from lerobot.utils.import_utils import register_third_party_plugins
 from lerobot.utils.utils import init_logging
@@ -96,6 +99,7 @@ def calibrate(cfg: CalibrateConfig):
 
 def main():
     register_third_party_plugins()
+    print(">>> calibrate() is running")
     calibrate()
 
 

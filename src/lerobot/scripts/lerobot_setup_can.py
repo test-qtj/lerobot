@@ -65,7 +65,7 @@ class CANSetupConfig:
     interfaces: str = "can0"  # Comma-separated, e.g. "can0,can1,can2,can3"
     bitrate: int = 1000000
     data_bitrate: int = 5000000
-    use_fd: bool = True
+    use_fd: bool = False   ### Use CAN FD (True) or CAN 2.0 (False)
     motor_ids: list[int] = field(default_factory=lambda: list(range(0x01, 0x09)))
     timeout: float = 1.0
     speed_iterations: int = 100

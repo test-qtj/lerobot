@@ -606,8 +606,19 @@ class RobstrideMotorsBus(MotorsBusBase):
         velocity_rad_per_sec = np.radians(velocity_deg_per_sec)
         pmax, vmax, tmax = MOTOR_LIMIT_PARAMS[motor_type]
 
-        kp_uint = self._float_to_uint(kp, 0, 500, 12)
-        kd_uint = self._float_to_uint(kd, 0, 5, 12)
+        # Different Robstride motor types use different MIT gain ranges.
+        # O0: kp 0~500, kd 0~5
+        # O4: kp 0~5000, kd 0~100
+        if motor_type == MotorType.O4:
+            kp_min, kp_max = 0.0, 5000.0
+            kd_min, kd_max = 0.0, 100.0
+        else:
+            kp_min, kp_max = 0.0, 500.0
+            kd_min, kd_max = 0.0, 5.0
+
+        kp_uint = self._float_to_uint(kp, kp_min, kp_max, 12)
+        kd_uint = self._float_to_uint(kd, kd_min, kd_max, 12)
+
         q_uint = self._float_to_uint(position_rad, -pmax, pmax, 16)
         dq_uint = self._float_to_uint(velocity_rad_per_sec, -vmax, vmax, 12)
         tau_uint = self._float_to_uint(torque, -tmax, tmax, 12)

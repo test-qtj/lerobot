@@ -54,7 +54,7 @@ MOTOR_LIMIT_PARAMS: dict[MotorType, tuple[float, float, float]] = {
     MotorType.O4: (12.57, 33, 120),
     MotorType.O5: (12.57, 50, 5.5),
     MotorType.ELO5: (12.57, 50, 6),
-    MotorType.O6: (112.5, 50, 36),
+    MotorType.O6: (12.57, 50, 36),
 }
 
 # Motor model names
