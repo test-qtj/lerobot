@@ -12,6 +12,10 @@ cansend can0 008#FFFFFFFFFFFFFFFC
 candump can0 -->
 
 # 设置 CAN 接口
+for can_port in can0 can1 can2 can3; do
+    sudo ip link set $can_port txqueuelen 1000
+done
+
 lerobot-setup-can --mode=setup --interfaces=can0,can1
 lerobot-setup-can --mode=setup --interfaces=can2,can3 --use_fd=true
 
@@ -36,8 +40,8 @@ lerobot-calibrate \
 
 lerobot-calibrate \
 --teleop.type=bi_hyopenarm_leader \
---teleop.left_arm_config.port=can0 \
---teleop.right_arm_config.port=can1 \
+--teleop.left_arm_config.port=can1 \
+--teleop.right_arm_config.port=can0 \
 --teleop.id=my_bimanual_hyleader
 
 # 跟随臂标定
@@ -99,10 +103,10 @@ lerobot-teleoperate \   .port=can0 \
     
 lerobot-teleoperate \
     --robot.type=bi_openarm_follower \
-    --robot.left_arm_config.port=can3 \
+    --robot.left_arm_config.port=can2 \
     --robot.left_arm_config.use_can_fd=true \
     --robot.left_arm_config.side=left \
-    --robot.right_arm_config.port=can2 \
+    --robot.right_arm_config.port=can3 \
     --robot.right_arm_config.use_can_fd=true \
     --robot.right_arm_config.side=right \
     --robot.id=my_bimanual_follower \
@@ -110,6 +114,16 @@ lerobot-teleoperate \
     --teleop.left_arm_config.port=can1 \
     --teleop.right_arm_config.port=can0 \
     --teleop.id=my_bimanual_hyleader
+
+# hugging face
+export http_proxy=http://127.0.0.1:7890
+export https_proxy=http://127.0.0.1:7890
+pip install "huggingface_hub[cli]"
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+hf auth login  #输入token
+hf auth whoami #查看user
+export HF_USER=" "
 
 # 采集数据集
 lerobot-record \
@@ -122,10 +136,51 @@ lerobot-record \
     --robot.left_arm_config.cameras='{wrist: {"type": "opencv", "index_or_path": 0, "width": 640, "height": 480, "fps": 60}}' \
     --robot.right_arm_config.cameras='{wrist: {"type": "opencv", "index_or_path": 1, "width": 640, "height": 480, "fps": 60}}' \
     --robot.cameras='{top: {"type": "realsense", "width": 640, "height": 480, "fps": 90}}' \
-    --dataset.repo_id=${HF_USER}/my_bimanual_dataset \  #
+    --dataset.repo_id=${HF_USER}/bi_openarm_test \  #token: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
     --dataset.single_task="  " \ #
     --dataset.num_episodes=50 \
     --dataset.episode_time_s=60 \
     --dataset.streaming_encoding=true \
     --dataset.encoder_threads=2 \
     --display_data=true
+
+lerobot-record \
+    --robot.type=bi_openarm_follower \
+    --robot.left_arm_config.port=can2 \
+    --robot.left_arm_config.use_can_fd=true \
+    --robot.left_arm_config.side=left \
+    --robot.right_arm_config.port=can3 \
+    --robot.right_arm_config.use_can_fd=true \
+    --robot.right_arm_config.side=right \
+    --robot.id=my_bimanual_follower \
+    --robot.left_arm_config.cameras='{
+        wrist_left: {"type": "opencv", "index_or_path": "/dev/video0", "width": 640, "height": 480, "fps": 30},
+        top: {"type": "intelrealsense", "serial_number_or_name": "141322252011", "width": 640, "height": 480, "fps": 30},
+        }' \
+    --robot.right_arm_config.cameras='{
+        wrist_right: {"type": "opencv", "index_or_path": "/dev/video2", "width": 640, "height": 480, "fps": 30}
+        }' \
+    --teleop.type=bi_hyopenarm_leader \
+    --teleop.left_arm_config.port=can1 \
+    --teleop.right_arm_config.port=can0 \
+    --teleop.id=my_bimanual_hyleader \
+    --dataset.repo_id=xfff67/bi_openarm_test \
+    --dataset.root=/home/mizu/lerobot/data/bi_openarm_test \
+    --dataset.push_to_hub=false \
+    --dataset.single_task="Left gripper picks the light blue stapler into the open black box, then right gripper places the blue duck into the box." \
+    --dataset.num_episodes=50 \
+    --dataset.episode_time_s=60 \
+    --dataset.streaming_encoding=false \
+    --dataset.vcodec=h264 \
+    --dataset.num_image_writer_processes=1 \
+    --dataset.num_image_writer_threads_per_camera=4 \
+    --resume=false \
+    --display_data=false 
+
+
+
+top: {"type": "intelrealsense", "serial_number_or_name": "141322252011", "width": 640, "height": 480, "fps": 30},
+wrist_left: {"type": "intelrealsense", "serial_number_or_name": "352122273643", "width": 640, "height": 480, "fps": 30},
+wrist_left: {"type": "opencv", "index_or_path": "/dev/video0", "width": 640, "height": 480, "fps": 30}, 
+
+    

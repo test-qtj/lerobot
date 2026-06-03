@@ -111,6 +111,7 @@ from lerobot.robots import (  # noqa: F401
     make_robot_from_config,
     omx_follower,
     openarm_follower,
+    hyopenarm_follower,
     reachy2,
     so_follower,
     unitree_g1 as unitree_g1_robot,
@@ -125,10 +126,12 @@ from lerobot.teleoperators import (  # noqa: F401
     make_teleoperator_from_config,
     omx_leader,
     openarm_leader,
+    hyopenarm_leader,
     openarm_mini,
     reachy2_teleoperator,
     so_leader,
     unitree_g1,
+    bi_hyopenarm_leader,
 )
 from lerobot.teleoperators.keyboard.teleop_keyboard import KeyboardTeleop
 from lerobot.utils.constants import ACTION, OBS_STR
@@ -398,7 +401,13 @@ def record_loop(
         else:
             action_values = act_processed_teleop
             robot_action_to_send = robot_action_processor((act_processed_teleop, obs))
-
+        # Invert left/right joint_1 ~ joint_4
+        for side in ("left", "right"):
+            for joint_idx in range(1, 5):
+                for field in ("pos", "vel", "torque"):
+                    key = f"{side}_joint_{joint_idx}.{field}"
+                    if key in robot_action_to_send:
+                        robot_action_to_send[key] = -robot_action_to_send[key]
         # Send action to robot
         # Action can eventually be clipped using `max_relative_target`,
         # so action actually sent is saved in the dataset. action = postprocessor.process(action)

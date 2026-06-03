@@ -475,7 +475,7 @@ class RobstrideMotorsBus(MotorsBusBase):
         return None
 
     def _recv_all_responses(
-        self, expected_recv_ids: list[int], timeout: float = 0.002
+        self, expected_recv_ids: list[int], timeout: float = 0.005
     ) -> dict[int, can.Message]:
         """
         Efficiently receive responses from multiple motors at once.
@@ -501,6 +501,9 @@ class RobstrideMotorsBus(MotorsBusBase):
                         break  # Got all responses, exit early
         except Exception as e:
             logger.debug(f"Error receiving responses: {e}")
+
+        return responses
+
 
         return responses
 
