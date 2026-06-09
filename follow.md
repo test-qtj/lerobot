@@ -12,6 +12,7 @@ cansend can0 008#FFFFFFFFFFFFFFFC
 candump can0 -->
 
 # 设置 CAN 接口
+# 把该 CAN 接口的 发送队列长度 设置为 1000
 for can_port in can0 can1 can2 can3; do
     sudo ip link set $can_port txqueuelen 1000
 done
@@ -115,6 +116,30 @@ lerobot-teleoperate \
     --teleop.right_arm_config.port=can0 \
     --teleop.id=my_bimanual_hyleader
 
+# 遥操作 显示摄像头画面
+
+lerobot-teleoperate \
+    --robot.type=bi_openarm_follower \
+    --robot.left_arm_config.port=can2 \
+    --robot.left_arm_config.use_can_fd=true \
+    --robot.left_arm_config.side=left \
+    --robot.left_arm_config.cameras='{
+        wrist_left: {"type": "intelrealsense", "serial_number_or_name": "260322272305", "width": 640, "height": 480, "fps": 30},
+        top: {"type": "intelrealsense", "serial_number_or_name": "141322252011", "width": 640, "height": 480, "fps": 30},
+        }' \
+    --robot.right_arm_config.port=can3 \
+    --robot.right_arm_config.cameras='{
+        wrist_right: {"type": "intelrealsense", "serial_number_or_name": "352122273643", "width": 640, "height": 480, "fps": 30},
+        }' \
+    --robot.right_arm_config.use_can_fd=true \
+    --robot.right_arm_config.side=right \
+    --robot.id=my_bimanual_follower \
+    --teleop.type=bi_hyopenarm_leader \
+    --teleop.left_arm_config.port=can1 \
+    --teleop.right_arm_config.port=can0 \
+    --teleop.id=my_bimanual_hyleader
+    --display_data=true
+
 # hugging face
 export http_proxy=http://127.0.0.1:7890
 export https_proxy=http://127.0.0.1:7890
@@ -154,11 +179,11 @@ lerobot-record \
     --robot.right_arm_config.side=right \
     --robot.id=my_bimanual_follower \
     --robot.left_arm_config.cameras='{
-        wrist_left: {"type": "opencv", "index_or_path": "/dev/video0", "width": 640, "height": 480, "fps": 30},
+        wrist_left: {"type": "intelrealsense", "serial_number_or_name": "260322272305", "width": 640, "height": 480, "fps": 30},
         top: {"type": "intelrealsense", "serial_number_or_name": "141322252011", "width": 640, "height": 480, "fps": 30},
         }' \
     --robot.right_arm_config.cameras='{
-        wrist_right: {"type": "opencv", "index_or_path": "/dev/video2", "width": 640, "height": 480, "fps": 30}
+        wrist_right: {"type": "intelrealsense", "serial_number_or_name": "352122273643", "width": 640, "height": 480, "fps": 30},
         }' \
     --teleop.type=bi_hyopenarm_leader \
     --teleop.left_arm_config.port=can1 \
@@ -182,5 +207,8 @@ lerobot-record \
 top: {"type": "intelrealsense", "serial_number_or_name": "141322252011", "width": 640, "height": 480, "fps": 30},
 wrist_left: {"type": "intelrealsense", "serial_number_or_name": "352122273643", "width": 640, "height": 480, "fps": 30},
 wrist_left: {"type": "opencv", "index_or_path": "/dev/video0", "width": 640, "height": 480, "fps": 30}, 
+# 右臂d405 id：352122273643
+# 左壁d405 id：260322272305
+ 
 
     
