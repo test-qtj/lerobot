@@ -199,7 +199,7 @@ lerobot-record \
     --dataset.vcodec=h264 \
     --dataset.num_image_writer_processes=1 \
     --dataset.num_image_writer_threads_per_camera=4 \
-    --resume=false \
+    --resume=true \
     --display_data=false 
 
 
@@ -207,8 +207,42 @@ lerobot-record \
 top: {"type": "intelrealsense", "serial_number_or_name": "141322252011", "width": 640, "height": 480, "fps": 30},
 wrist_left: {"type": "intelrealsense", "serial_number_or_name": "352122273643", "width": 640, "height": 480, "fps": 30},
 wrist_left: {"type": "opencv", "index_or_path": "/dev/video0", "width": 640, "height": 480, "fps": 30}, 
+
 # 右臂d405 id：352122273643
 # 左壁d405 id：260322272305
  
+ hf upload limboyo/lerobot_openarm /home/mizu/lerobot/data/bi_openarm_test / --repo-type=dataset
 
-    
+lerobot-replay \
+    --robot.type=bi_openarm_follower \
+    --robot.left_arm_config.port=can2 \
+    --robot.left_arm_config.use_can_fd=true \
+    --robot.left_arm_config.side=left \
+    --robot.right_arm_config.port=can3 \
+    --robot.right_arm_config.use_can_fd=true \
+    --robot.right_arm_config.side=right \
+    --robot.id=my_bimanual_follower \
+    --dataset.root=/home/mizu/lerobot/data/bi_openarm_test \
+    --dataset.repo_id=xfff67/bi_openarm_test \
+    --dataset.episode=2
+
+lerobot-train \
+    --dataset.repo_id=limboyo/lerobot_openarm \
+    --dataset.root=/home/mizu/lerobot/data/bi_openarm_test \
+    --dataset.revision=v3.0 \
+    --policy.type=pi05 \
+    --output_dir=~/output_lerobot_train/shake/pi05_A \
+    --job_name=shake_pi05_A \
+    --policy.pretrained_path=lerobot/pi05_base \
+    --policy.compile_model=true \
+    --policy.gradient_checkpointing=true \
+    --wandb.enable=true \
+    --wandb.project=Lerobot_limboyo_Project \
+    --policy.dtype=bfloat16 \
+    --policy.freeze_vision_encoder=false \
+    --policy.train_expert_only=false \
+    --steps=50000 \
+    --policy.push_to_hub=false \
+    --policy.device=cuda \
+    --batch_size=32
+
