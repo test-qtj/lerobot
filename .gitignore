@@ -166,7 +166,12 @@ wandb/
 
 # Data folders
 data/
+datasets/
 outputs/
+
+# Locally generated dataset previews and simulator logs
+openarm_ball_pick_30s_h264_preview/
+MUJOCO_LOG.TXT
 
 # Translations
 *.mo
