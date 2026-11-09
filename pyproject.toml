@@ -108,6 +108,7 @@ robstride = ["lerobot[can-dep]"]
 
 # Robots
 openarms = ["lerobot[damiao]"]
+openarm-mujoco = ["mujoco>=3.6.0"]
 gamepad = ["lerobot[pygame-dep]", "hidapi>=0.14.0,<0.15.0"]
 hopejr = ["lerobot[feetech]", "lerobot[pygame-dep]"]
 lekiwi = ["lerobot[feetech]", "pyzmq>=26.2.1,<28.0.0"]

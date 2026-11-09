@@ -17,3 +17,4 @@
 from .config import RobotConfig
 from .robot import Robot
 from .utils import make_robot_from_config
+from .bi_openarm_mujoco import BiOpenArmMujoco, BiOpenArmMujocoConfig
