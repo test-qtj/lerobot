@@ -31,11 +31,10 @@ logger = logging.getLogger(__name__)
 
 
 class HyOpenArmLeader(Teleoperator):
-    """Hybrid leader arm with Robstride + Damiao motors.
+    """Leader arm supporting Robstride, Damiao, or mixed motor configurations.
 
-    Motor split:
-    - joint_1 ~ joint_4: Robstride
-    - joint_5 ~ gripper: Damiao DM4310
+    Motors are routed to their configured bus, allowing all-Damiao,
+    all-Robstride, or mixed-motor arms.
     """
 
     config_class = HyOpenArmLeaderConfig
@@ -86,6 +85,7 @@ class HyOpenArmLeader(Teleoperator):
             "robstride": self.robstride_bus,
             "damiao": self.damiao_bus,
         }
+        self.active_buses = {name: bus for name, bus in self.buses.items() if bus.motors}
 
     @property
     def action_features(self) -> dict[str, type]:
@@ -102,19 +102,17 @@ class HyOpenArmLeader(Teleoperator):
 
     @property
     def is_connected(self) -> bool:
-        return self.robstride_bus.is_connected and self.damiao_bus.is_connected
+        return all(bus.is_connected for bus in self.active_buses.values())
 
     @property
     def is_calibrated(self) -> bool:
-        return self.robstride_bus.is_calibrated and self.damiao_bus.is_calibrated
+        return all(bus.is_calibrated for bus in self.active_buses.values())
 
     @check_if_already_connected
     def connect(self, calibrate: bool = True) -> None:
-        logger.info(f"Connecting Robstride arm bus on {self.config.port}...")
-        self.robstride_bus.connect()
-
-        logger.info(f"Connecting Damiao arm bus on {self.config.port}...")
-        self.damiao_bus.connect()
+        for bus_name, bus in self.active_buses.items():
+            logger.info(f"Connecting {bus_name.title()} arm bus on {self.config.port}...")
+            bus.connect()
 
         if not self.is_calibrated and calibrate:
             logger.info(
@@ -132,29 +130,25 @@ class HyOpenArmLeader(Teleoperator):
             )
             if user_input.strip().lower() != "c":
                 logger.info(f"Writing calibration file associated with the id {self.id} to the motors")
-                self.robstride_bus.write_calibration(
-                    {k: v for k, v in self.calibration.items() if k in self.robstride_bus.motors}
-                )
-                self.damiao_bus.write_calibration(
-                    {k: v for k, v in self.calibration.items() if k in self.damiao_bus.motors}
-                )
+                for bus in self.active_buses.values():
+                    bus.write_calibration({k: v for k, v in self.calibration.items() if k in bus.motors})
                 return
 
         logger.info(f"\nRunning calibration for {self}")
-        self.robstride_bus.disable_torque()
-        self.damiao_bus.disable_torque()
+        for bus in self.active_buses.values():
+            bus.disable_torque()
 
         input(
             "\nCalibration: Set Zero Position\n"
             "Position the arm in the reference configuration, then press ENTER..."
         )
 
-        self.robstride_bus.set_zero_position()
-        self.damiao_bus.set_zero_position()
-        logger.info("Hybrid arm zero position set.")
+        for bus in self.active_buses.values():
+            bus.set_zero_position()
+        logger.info("Arm zero position set.")
 
         logger.info("Setting default range: -90° to +90° for all joints")
-        for bus in (self.robstride_bus, self.damiao_bus):
+        for bus in self.active_buses.values():
             for motor_name, motor in bus.motors.items():
                 self.calibration[motor_name] = MotorCalibration(
                     id=motor.id,
@@ -164,23 +158,19 @@ class HyOpenArmLeader(Teleoperator):
                     range_max=90,
                 )
 
-        self.robstride_bus.write_calibration(
-            {k: v for k, v in self.calibration.items() if k in self.robstride_bus.motors}
-        )
-        self.damiao_bus.write_calibration(
-            {k: v for k, v in self.calibration.items() if k in self.damiao_bus.motors}
-        )
+        for bus in self.active_buses.values():
+            bus.write_calibration({k: v for k, v in self.calibration.items() if k in bus.motors})
         self._save_calibration()
         print(f"Calibration saved to {self.calibration_fpath}")
 
     def configure(self) -> None:
         if self.config.manual_control:
-            self.robstride_bus.disable_torque()
-            self.damiao_bus.disable_torque()
+            for bus in self.active_buses.values():
+                bus.disable_torque()
             return
 
-        self.robstride_bus.configure_motors()
-        self.damiao_bus.configure_motors()
+        for bus in self.active_buses.values():
+            bus.configure_motors()
 
         for idx, motor_name in enumerate(self.config.motor_config.keys()):
             kp = self.config.position_kp[idx]
@@ -203,12 +193,9 @@ class HyOpenArmLeader(Teleoperator):
         start = time.perf_counter()
         action_dict: dict[str, Any] = {}
 
-        robstride_states = self.robstride_bus.sync_read_all_states() if self.robstride_bus.motors else {}
-        damiao_states = self.damiao_bus.sync_read_all_states() if self.damiao_bus.motors else {}
-
         all_states = {}
-        all_states.update(robstride_states)
-        all_states.update(damiao_states)
+        for bus in self.active_buses.values():
+            all_states.update(bus.sync_read_all_states())
 
         for motor_name in self.config.motor_config:
             state = all_states.get(motor_name, {})
@@ -231,6 +218,6 @@ class HyOpenArmLeader(Teleoperator):
 
     @check_if_not_connected
     def disconnect(self) -> None:
-        self.robstride_bus.disconnect(disable_torque=self.config.manual_control)
-        self.damiao_bus.disconnect(disable_torque=self.config.manual_control)
+        for bus in self.active_buses.values():
+            bus.disconnect(disable_torque=self.config.manual_control)
         logger.info(f"{self} disconnected.")

@@ -83,12 +83,12 @@ class OpenArmFollowerConfigBase:
         default_factory=lambda: {
             "joint_1": (0x01, 0x11, "dm8009"),  # J1 - Shoulder pan (DM8009)
             "joint_2": (0x02, 0x12, "dm8009"),  # J2 - Shoulder lift (DM8009)
-            "joint_3": (0x03, 0x13, "dm4340_48V"),  # J3 - Shoulder rotation (DM4340)
-            "joint_4": (0x04, 0x14, "dm4340_48V"),  # J4 - Elbow flex (DM4340)
-            "joint_5": (0x05, 0x15, "dm4310_48V"),  # J5 - Wrist roll (DM4310)
-            "joint_6": (0x06, 0x16, "dm4310_48V"),  # J6 - Wrist pitch (DM4310)
-            "joint_7": (0x07, 0x17, "dm4310_48V"),  # J7 - Wrist rotation (DM4310)
-            "gripper": (0x08, 0x18, "dm4310_48V"),  # J8 - Gripper (DM4310)
+            "joint_3": (0x03, 0x13, "dm4340"),  # J3 - Shoulder rotation (DM4340, 24V parameters)
+            "joint_4": (0x04, 0x14, "dm4340"),  # J4 - Elbow flex (DM4340, 24V parameters)
+            "joint_5": (0x05, 0x15, "dm4310"),  # J5 - Wrist roll (DM4310, 24V parameters)
+            "joint_6": (0x06, 0x16, "dm4310"),  # J6 - Wrist pitch (DM4310, 24V parameters)
+            "joint_7": (0x07, 0x17, "dm4310"),  # J7 - Wrist rotation (DM4310, 24V parameters)
+            "gripper": (0x08, 0x18, "dm4310"),  # J8 - Gripper (DM4310, 24V parameters)
         }
     )
 

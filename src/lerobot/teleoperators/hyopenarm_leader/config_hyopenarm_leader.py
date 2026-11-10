@@ -38,16 +38,14 @@ class HyOpenArmLeaderConfigBase:
     # Motor configuration for OpenArms (7 DOF per arm)
     # Maps motor names to (send_can_id, recv_can_id, motor_type)
     # Based on: https://docs.openarm.dev/software/setup/configure-test
-    # HyOpenArms uses 3 types of motors:
-    # - robstride06 for shoulders (high torque)
-    # - robstride00 for shoulder rotation and elbow
-    # - DM4310 (DM-J4310-2EC V1.1) for wrist and gripper
+    # This configuration uses Damiao motors with 24V motor parameters where
+    # the motor family has separate 24V and 48V model entries.
     motor_config: dict[str, tuple[int, int, str, str]] = field(
         default_factory=lambda: {
-            "joint_1": (0x01, 0x01, "O6", "robstride"),
-            "joint_2": (0x02, 0x02, "O6", "robstride"),
-            "joint_3": (0x03, 0x03, "O0", "robstride"),
-            "joint_4": (0x04, 0x04, "O0", "robstride"),
+            "joint_1": (0x01, 0x11, "dm8009", "damiao"),
+            "joint_2": (0x02, 0x12, "dm4340", "damiao"),
+            "joint_3": (0x03, 0x13, "dm4340", "damiao"),
+            "joint_4": (0x04, 0x14, "dm4340", "damiao"),
             "joint_5": (0x05, 0x15, "dm4310", "damiao"),
             "joint_6": (0x06, 0x16, "dm4310", "damiao"),
             "joint_7": (0x07, 0x17, "dm4310", "damiao"),
