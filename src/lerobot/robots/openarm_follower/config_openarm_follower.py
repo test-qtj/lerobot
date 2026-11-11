@@ -57,10 +57,10 @@ class OpenArmFollowerConfigBase:
     # CAN interface type: "socketcan" (Linux), "slcan" (serial), or "auto" (auto-detect)
     can_interface: str = "socketcan"
 
-    # CAN FD settings (OpenArms uses CAN FD by default)
-    use_can_fd: bool = True
-    can_bitrate: int = 1000000  # Nominal bitrate (1 Mbps)
-    can_data_bitrate: int = 5000000  # Data bitrate for CAN FD (5 Mbps)
+    # Classical CAN settings (1 Mbps). The data bitrate is only used when CAN-FD is enabled.
+    use_can_fd: bool = False
+    can_bitrate: int = 1000000
+    can_data_bitrate: int = 5000000
 
     # Whether to disable torque when disconnecting
     disable_torque_on_disconnect: bool = True
